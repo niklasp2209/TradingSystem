@@ -9,6 +9,17 @@ Dieses Projekt bietet ein **Handelssystem** für Minecraft, bei dem Spieler ihre
 - Es speichert die aktuellen Gegenstände sowie den Status des Handels (z. B. **UNFINISHED**, **PROCESSING**, **DONE**).
 - Spieler können **Coins** (via Vault) und Gegenstände zu einem Handelsangebot hinzufügen, um mit anderen Spielern zu handeln.
 
+```java
+public class TradePlayer {
+    private Player player;
+    private List<ItemStack> inventoryItems;
+    private double coins;
+    private TradeStatus tradeStatus;
+    
+    // Weitere Methoden zum Hinzufügen und Entfernen von Items und Coins
+}
+```
+
 ### 2. Trade
 - Die `Trade`-Klasse verwaltet den gesamten Handelsvorgang zwischen zwei Spielern.
 - Sie ermöglicht es den Spielern, Gegenstände hinzuzufügen, Coins zu integrieren und den Status des Handels zu verwalten.
