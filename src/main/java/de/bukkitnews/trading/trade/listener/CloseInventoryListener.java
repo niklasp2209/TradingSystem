@@ -2,6 +2,7 @@ package de.bukkitnews.trading.trade.listener;
 
 import de.bukkitnews.trading.Trading;
 import de.bukkitnews.trading.trade.model.TradePlayer;
+import de.bukkitnews.trading.util.MessageUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
@@ -28,7 +29,7 @@ public class CloseInventoryListener implements Listener {
     public void onClose(@NonNull InventoryCloseEvent event) {
         Player player = (Player) event.getPlayer();
 
-        if (!event.getView().getTitle().equals("Inventory")) {
+        if (!event.getView().getTitle().equals(MessageUtil.getMessage("inventory"))) {
             return;
         }
 
@@ -37,7 +38,7 @@ public class CloseInventoryListener implements Listener {
                     tradePlayer.getPlayer().getInventory().addItem(itemStack)
             );
 
-            tradePlayer.getPlayer().sendMessage("Test 18");
+            tradePlayer.getPlayer().sendMessage(MessageUtil.getMessage("trade_cancel"));
 
             this.trading.getTradeManager().unregisterTrade(tradePlayer.getPlayer());
 

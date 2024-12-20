@@ -1,5 +1,6 @@
 package de.bukkitnews.trading.trade.model;
 
+import de.bukkitnews.trading.util.MessageUtil;
 import de.bukkitnews.trading.util.TradeItems;
 import de.bukkitnews.trading.util.ItemUtil;
 import lombok.Getter;
@@ -189,25 +190,23 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
         }
 
         if (this.host.getItems().size() > this.target.amountOfEmptySlots()) {
-            this.target.getPlayer().sendMessage("Test 1");
+            this.target.getPlayer().sendMessage(MessageUtil.getMessage("trade_notenough"));
             this.target.getPlayer().closeInventory();
             return;
         }
 
         if (this.target.getItems().size() > this.host.amountOfEmptySlots()) {
-            this.host.getPlayer().sendMessage("Test 2");
+            this.host.getPlayer().sendMessage(MessageUtil.getMessage("trade_notenough"));
             this.host.getPlayer().closeInventory();
             return;
         }
 
         if (this.host.getCoins() > 0 && this.host.getCoins() > this.target.getCoins()) {
-            this.host.getPlayer().sendMessage("Test 3");
             this.host.getPlayer().closeInventory();
             return;
         }
 
         if (this.target.getCoins() > 0 && this.target.getCoins() > this.host.getCoins()) {
-            this.target.getPlayer().sendMessage("Test 4");
             this.target.getPlayer().closeInventory();
             return;
         }
@@ -217,8 +216,8 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
 
         this.host.getPlayer().closeInventory();
         this.target.getPlayer().closeInventory();
-        this.host.getPlayer().sendMessage("Test 5");
-        this.target.getPlayer().sendMessage("Test 6");
+        this.host.getPlayer().sendMessage(MessageUtil.getMessage("trade_success"));
+        this.target.getPlayer().sendMessage(MessageUtil.getMessage("trade_success"));
     }
 
     /**
@@ -230,7 +229,7 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
     public void createInventory(@NonNull TradePlayer tradePlayer) {
         TradePlayer target = getTarget(tradePlayer);
         Inventory inventory = Bukkit.createInventory((InventoryHolder) tradePlayer.getPlayer(),
-                54, "Inventory");
+                54, MessageUtil.getMessage("inventory"));
 
         inventory.setItem(0, new ItemUtil(Material.PLAYER_HEAD)
                 .setSkullOwner(tradePlayer.getPlayer().getName())

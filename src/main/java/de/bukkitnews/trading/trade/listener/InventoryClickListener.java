@@ -3,6 +3,7 @@ package de.bukkitnews.trading.trade.listener;
 import de.bukkitnews.trading.Trading;
 import de.bukkitnews.trading.trade.model.Trade;
 import de.bukkitnews.trading.trade.model.TradePlayer;
+import de.bukkitnews.trading.util.MessageUtil;
 import de.bukkitnews.trading.util.TradeItems;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class InventoryClickListener implements Listener {
     public void handleClick(@NonNull InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
 
-        if (!"Inventory".equals(event.getView().getTitle())) {
+        if (!event.getView().getTitle().equals(MessageUtil.getMessage("inventory"))) {
             return;
         }
 

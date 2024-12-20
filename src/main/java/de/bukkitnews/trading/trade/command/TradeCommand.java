@@ -1,6 +1,7 @@
 package de.bukkitnews.trading.trade.command;
 
 import de.bukkitnews.trading.Trading;
+import de.bukkitnews.trading.util.MessageUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
@@ -26,14 +27,14 @@ public class TradeCommand implements CommandExecutor {
         Player player = (Player) sender;
 
         if (args.length == 0) {
-            player.sendMessage("Benutze /trade <Spieler>");
+            player.sendMessage(MessageUtil.getMessage("command_trade_usage"));
             return true;
         }
 
         Optional<Player> targetOpt = Optional.ofNullable(Bukkit.getPlayer(args[args.length - 1]));
 
         if (targetOpt.isEmpty()) {
-            player.sendMessage("Der angegebene Spieler ist nicht online.");
+            player.sendMessage(MessageUtil.getMessage("player_not_online"));
             return true;
         }
 
@@ -49,12 +50,12 @@ public class TradeCommand implements CommandExecutor {
             return true;
         }
 
-        player.sendMessage("Ungültiger Befehl. Benutze entweder '/trade <Spieler>' oder '/trade accept <Spieler>'.");
+        player.sendMessage(MessageUtil.getMessage("command_main_usage"));
         return true;
     }
 
     /**
-     * This method handles the '/trade accept <Spieler>' command.
+     * This method handles the '/trade accept <Player>' command.
      * It checks if the player has a valid trade invitation and accepts the trade if valid.
      *
      * @param player The player accepting the trade.
@@ -62,20 +63,20 @@ public class TradeCommand implements CommandExecutor {
      */
     private void handleAcceptCommand(@NonNull Player player, @NonNull Player target) {
         if (!plugin.getTradeManager().inviteValid(player)) {
-            player.sendMessage("Du hast keine Einladung.");
+            player.sendMessage(MessageUtil.getMessage("trade_no_invites"));
             return;
         }
 
         plugin.getTradeManager().unregisterTrade(player);
         plugin.getTradeManager().unregisterTrade(target);
         plugin.getTradeManager().createTrade(player, target);
-        player.sendMessage("Du hast die Einladung von " + target.getName() + " akzeptiert.");
-        target.sendMessage(player.getName() + " hat deine Einladung angenommen.");
+        player.sendMessage(MessageUtil.getMessage("player_trade_accept", target.getName()));
+        target.sendMessage(MessageUtil.getMessage("target_trade_accept", player.getName()));
         return;
     }
 
     /**
-     * This method handles the '/trade <Spieler>' command.
+     * This method handles the '/trade <Player>' command.
      * It sends an invitation to the target player to initiate a trade.
      *
      * @param player The player who is sending the trade invitation.
@@ -83,13 +84,13 @@ public class TradeCommand implements CommandExecutor {
      */
     private void handleInviteCommand(@NonNull Player player, @NonNull Player target) {
         if (player.equals(target)) {
-            player.sendMessage("Du kannst dich nicht selbst einladen.");
+            player.sendMessage(MessageUtil.getMessage("command_trade_yourself"));
             return;
         }
 
         plugin.getTradeManager().registerInvite(player, target);
-        player.sendMessage("Du hast " + target.getName() + " eingeladen.");
-        target.sendMessage("Du wurdest von " + player.getName() + " eingeladen.");
+        player.sendMessage(MessageUtil.getMessage("player_trade_invite", target.getName()));
+        target.sendMessage(MessageUtil.getMessage("target_trade_invite", player.getName()));
         return;
     }
 }
