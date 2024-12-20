@@ -1,5 +1,6 @@
 package de.bukkitnews.trading.trade.model;
 
+import de.bukkitnews.trading.Trading;
 import de.bukkitnews.trading.util.MessageUtil;
 import de.bukkitnews.trading.util.TradeItems;
 import de.bukkitnews.trading.util.ItemUtil;
@@ -23,11 +24,12 @@ import java.util.stream.IntStream;
  * It handles the various actions that can be performed during the trade, such as adding/removing items,
  * setting coins, and managing the state of the trade.
  */
-public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) implements TradeActions {
+public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target, @NonNull Trading trading) implements TradeActions {
 
-    public Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) {
+    public Trade(@NonNull TradePlayer host, @NonNull TradePlayer target, @NonNull Trading trading) {
         this.host = host;
         this.target = target;
+        this.trading = trading;
         Arrays.asList(host, target).forEach(this::createInventory);
     }
 
@@ -185,39 +187,60 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
      */
     @Override
     public void finishTrade() {
+        Player hostPlayer = this.host.getPlayer();
+        Player targetPlayer = this.target.getPlayer();
+
         if (this.host.getState() != State.DONE || this.target.getState() != State.DONE) {
             return;
         }
 
         if (this.host.getItems().size() > this.target.amountOfEmptySlots()) {
-            this.target.getPlayer().sendMessage(MessageUtil.getMessage("trade_notenough"));
-            this.target.getPlayer().closeInventory();
+            targetPlayer.sendMessage(MessageUtil.getMessage("trade_notenough"));
+            targetPlayer.closeInventory();
             return;
         }
 
         if (this.target.getItems().size() > this.host.amountOfEmptySlots()) {
-            this.host.getPlayer().sendMessage(MessageUtil.getMessage("trade_notenough"));
-            this.host.getPlayer().closeInventory();
+            hostPlayer.sendMessage(MessageUtil.getMessage("trade_notenough"));
+            hostPlayer.closeInventory();
             return;
         }
 
-        if (this.host.getCoins() > 0 && this.host.getCoins() > this.target.getCoins()) {
-            this.host.getPlayer().closeInventory();
+        if ((this.host.getCoins() > 0 && this.trading.getEconomy().getBalance(hostPlayer) - this.host.getCoins() <= 0.0D) ||
+                (this.target.getCoins() > 0 && this.trading.getEconomy().getBalance(targetPlayer) - this.target.getCoins() <= 0.0D)) {
+
+            if (this.host.getCoins() > 0) {
+                hostPlayer.sendMessage(MessageUtil.getMessage("trade_notcoins"));
+                hostPlayer.closeInventory();
+            }
+
+            if (this.target.getCoins() > 0) {
+                targetPlayer.sendMessage(MessageUtil.getMessage("trade_notcoins"));
+                targetPlayer.closeInventory();
+            }
+
             return;
         }
 
-        if (this.target.getCoins() > 0 && this.target.getCoins() > this.host.getCoins()) {
-            this.target.getPlayer().closeInventory();
-            return;
+        //handle coins
+        if (this.host.getCoins() > 0) {
+            this.trading.getEconomy().withdrawPlayer(hostPlayer, this.host.getCoins());
+            this.trading.getEconomy().depositPlayer(targetPlayer, this.host.getCoins());
         }
 
-        this.host.getItems().forEach(item -> this.target.getPlayer().getInventory().addItem(item));
-        this.target.getItems().forEach(item -> this.host.getPlayer().getInventory().addItem(item));
+        if (this.target.getCoins() > 0) {
+            this.trading.getEconomy().withdrawPlayer(targetPlayer, this.target.getCoins());
+            this.trading.getEconomy().depositPlayer(hostPlayer, this.target.getCoins());
+        }
 
-        this.host.getPlayer().closeInventory();
-        this.target.getPlayer().closeInventory();
-        this.host.getPlayer().sendMessage(MessageUtil.getMessage("trade_success"));
-        this.target.getPlayer().sendMessage(MessageUtil.getMessage("trade_success"));
+        //handle items
+        this.host.getItems().forEach(item -> targetPlayer.getInventory().addItem(item));
+        this.target.getItems().forEach(item -> hostPlayer.getInventory().addItem(item));
+
+        hostPlayer.closeInventory();
+        targetPlayer.closeInventory();
+        hostPlayer.sendMessage(MessageUtil.getMessage("trade_success"));
+        targetPlayer.sendMessage(MessageUtil.getMessage("trade_success"));
     }
 
     /**

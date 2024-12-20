@@ -5,6 +5,8 @@ main: de.bukkitnews.trading.Trading
 api-version: 1.21
 depend:
   - Vault
+loadBefore:
+  - Vault
 commands:
   trade:
     description: Trading Command
