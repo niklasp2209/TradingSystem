@@ -36,6 +36,18 @@ public class TradePlayer {
 - Sie ermöglicht es den Spielern, Gegenstände hinzuzufügen, Coins zu integrieren und den Status des Handels zu verwalten.
 - Vor dem Abschluss eines Handels wird geprüft, ob beide Spieler genügend **Coins** und Platz im Inventar des anderen haben.
 
+  
+```java
+public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) implements TradeActions {
+
+    public Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) {
+        this.host = host;
+        this.target = target;
+        Arrays.asList(host, target).forEach(this::createInventory);
+    }
+}
+```
+
 ### 3. TradeManager
 - Der `TradeManager` ist für die Verwaltung aller Handelsanfragen verantwortlich. Er verfolgt alle aktiven Handelsvorgänge und sorgt dafür, dass nur gültige Anfragen bearbeitet werden.
 - Handelsanfragen werden über eine Einladung in Form eines Befehls (z. B. `/trade <Spieler>`) gestartet und können vom eingeladenen Spieler akzeptiert oder abgelehnt werden.
