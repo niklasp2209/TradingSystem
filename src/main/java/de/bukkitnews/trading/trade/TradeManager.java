@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * The TradeManager handles the trade invitations and active trades between players.
@@ -15,8 +16,8 @@ import java.util.Optional;
  */
 public class TradeManager {
 
-    private final HashMap<Player, Player> invites = new HashMap<>();
-    private final HashMap<Player, Trade> trades = new HashMap<>();
+    private final HashMap<UUID, UUID> invites = new HashMap<>();
+    private final HashMap<UUID, Trade> trades = new HashMap<>();
 
     /**
      * Retrieves the player that has invited the specified player to trade.
@@ -24,8 +25,8 @@ public class TradeManager {
      * @param player The player whose invitation status is being checked.
      * @return An Optional containing the invited player, or empty if no invitation exists.
      */
-    public Optional<Player> getInvited(@Nullable Player player) {
-        return Optional.ofNullable(invites.get(player));
+    public Optional<UUID> getInvited(@Nullable Player player) {
+        return Optional.ofNullable(player).map(p -> invites.get(p.getUniqueId()));
     }
 
     /**
@@ -36,8 +37,7 @@ public class TradeManager {
      * @param target The player who is being invited.
      */
     public void registerInvite(@NonNull Player player, @NonNull Player target) {
-        invites.put(player, target);
-        invites.put(target, player);
+        invites.put(player.getUniqueId(), target.getUniqueId());
     }
 
     /**
@@ -47,8 +47,7 @@ public class TradeManager {
      * @param player The player whose invitation is being removed.
      */
     public void unregisterInvite(@NonNull Player player) {
-        invites.remove(player);
-        invites.remove(getInvited(player).orElse(null));
+        invites.remove(player.getUniqueId());
     }
 
     /**
@@ -59,9 +58,11 @@ public class TradeManager {
      * @return true if the invitation is valid, false otherwise.
      */
     public boolean inviteValid(@NonNull Player player) {
+        UUID playerUUID = player.getUniqueId();
         return getInvited(player)
-                .map(target -> getInvited(target).filter(invitee -> invitee.equals(player)).isPresent())
-                .orElse(false);
+                .map(invites::get)
+                .filter(inviteeUUID -> inviteeUUID.equals(playerUUID))
+                .isPresent();
     }
 
     /**
@@ -86,8 +87,8 @@ public class TradeManager {
         TradePlayer tpT = new TradePlayer(target);
         Trade trade = new Trade(tpP, tpT);
 
-        trades.put(tpP.getPlayer(), trade);
-        trades.put(tpT.getPlayer(), trade);
+        trades.put(player.getUniqueId(), trade);
+        trades.put(target.getUniqueId(), trade);
     }
 
     /**
@@ -97,6 +98,6 @@ public class TradeManager {
      * @param player The player whose trade is being removed.
      */
     public void unregisterTrade(@NonNull Player player) {
-        this.trades.remove(player);
+        this.trades.remove(player.getUniqueId());
     }
 }

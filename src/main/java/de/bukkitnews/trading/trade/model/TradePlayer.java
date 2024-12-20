@@ -1,8 +1,10 @@
 package de.bukkitnews.trading.trade.model;
 
+import de.bukkitnews.trading.util.ItemUtil;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -39,12 +41,21 @@ public class TradePlayer {
      * @return The number of empty slots in the player's inventory.
      */
     public int amountOfEmptySlots() {
-        int result = 0;
-        for (int i = 0; i < 36; i++) {
-            if (this.player.getInventory().getItem(i) == null)
-                result++;
-        }
-        return result;
+        return (int) java.util.stream.IntStream.range(0, 36)
+                .mapToObj(i -> this.player.getInventory().getItem(i))
+                .filter(java.util.Objects::isNull)
+                .count();
+    }
+
+    /**
+     * Creates a custom ItemStack to display the coin and value amounts for a player in the trade.
+     *
+     * @return An ItemStack representing the player's coins and value.
+     */
+    public ItemStack getCoinsItem() {
+        return new ItemUtil(Material.SUNFLOWER)
+                .setDisplayname(this.coins + " " + this.value + " 400")
+                .build();
     }
 
     /**

@@ -55,18 +55,18 @@ public class InventoryClickListener implements Listener {
             return;
         }
 
-        Material clickedItemType = event.getCurrentItem().getType();
-
-        if (clickedItemType == Material.SUNFLOWER && (event.getSlot() == 3 || event.getSlot() == 5)) {
-            handleCoinModification(event, tradePlayer, trade);
+        if (event.getCurrentItem().equals(TradeItems.ITEM_HANDLING_PROCESSING) && event.getSlot() == 22) {
+            trade.updateState(tradePlayer, Trade.State.PROCESSING);
             return;
         }
 
-        if (clickedItemType == TradeItems.ITEM_HANDLING_PROCESSING.getType() && event.getSlot() == 22) {
-            trade.updateState(tradePlayer, Trade.State.PROCESSING);
-            return;
-        } else if (clickedItemType == TradeItems.ITEM_HANDLING_SURE.getType() && event.getSlot() == 22) {
+        if (event.getCurrentItem().equals(TradeItems.ITEM_HANDLING_SURE) && event.getSlot() == 22) {
             trade.updateState(tradePlayer, Trade.State.DONE);
+            return;
+        }
+
+        if (event.getCurrentItem().getType() == Material.SUNFLOWER && (event.getSlot() == 3 || event.getSlot() == 5)) {
+            handleCoinModification(event, tradePlayer, trade);
             return;
         }
 
@@ -120,7 +120,7 @@ public class InventoryClickListener implements Listener {
      */
     private void handleItemModification(@NonNull InventoryClickEvent event, @NonNull Trade trade, @NonNull TradePlayer tradePlayer) {
         if (trade.getValidSlots().contains(event.getRawSlot())) {
-            trade.removeItem(tradePlayer, event.getRawSlot(), event.getCurrentItem());
+            trade.removeItem(tradePlayer, event.getRawSlot());
         } else {
             if (event.getClickedInventory() == null || event.getClickedInventory().getType() != InventoryType.PLAYER)
                 return;

@@ -22,8 +22,7 @@ import java.util.stream.IntStream;
  * It handles the various actions that can be performed during the trade, such as adding/removing items,
  * setting coins, and managing the state of the trade.
  */
-@Getter
-public record Trade(TradePlayer host, TradePlayer target) implements TradeActions {
+public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) implements TradeActions {
 
     public Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) {
         this.host = host;
@@ -87,18 +86,23 @@ public record Trade(TradePlayer host, TradePlayer target) implements TradeAction
      *
      * @param tradePlayer The player removing the item.
      * @param slot        The slot where the item is being removed from.
-     * @param itemStack   The item being removed from the trade.
      */
     @Override
-    public void removeItem(@NonNull TradePlayer tradePlayer, int slot, @NonNull ItemStack itemStack) {
+    public void removeItem(@NonNull TradePlayer tradePlayer, int slot) {
         TradePlayer target = getTarget(tradePlayer);
         updateState(tradePlayer, State.UNFINISHED);
         updateState(target, State.UNFINISHED);
 
-        tradePlayer.getPlayer().getInventory().addItem(itemStack);
-        tradePlayer.getPlayer().getOpenInventory().setItem(slot, new ItemStack(Material.AIR));
-        tradePlayer.getItems().remove(itemStack);
-        target.getPlayer().getOpenInventory().setItem(getTargetSlots(slot), new ItemStack(Material.AIR));
+        ItemStack itemStack = tradePlayer.getPlayer().getOpenInventory().getItem(slot);
+
+        if (itemStack != null && !itemStack.getType().isAir()) {
+            tradePlayer.getPlayer().getInventory().addItem(itemStack);
+
+            tradePlayer.getPlayer().getOpenInventory().setItem(slot, new ItemStack(Material.AIR));
+            tradePlayer.getItems().remove(itemStack);
+
+            target.getPlayer().getOpenInventory().setItem(getTargetSlots(slot), new ItemStack(Material.AIR));
+        }
     }
 
     /**
@@ -139,25 +143,19 @@ public record Trade(TradePlayer host, TradePlayer target) implements TradeAction
         }
 
         tradePlayer.setState(state);
-        ItemStack statusItem = switch (state) {
-            case UNFINISHED -> TradeItems.ITEM_STATUS_UNFINISHED;
-            case PROCESSING -> TradeItems.ITEM_STATUS_PROCESSING;
-            case DONE -> TradeItems.ITEM_STATUS_DONE;
-        };
 
+        ItemStack statusItem = state.getStatusItem();
         IntStream.range(18, 22).forEach(i -> tradePlayer.getPlayer().getOpenInventory().setItem(i, statusItem));
         TradePlayer target = getTarget(tradePlayer);
         IntStream.range(23, 27).forEach(i -> target.getPlayer().getOpenInventory().setItem(i, statusItem));
 
-        if (state == State.UNFINISHED) {
-            tradePlayer.getPlayer().getOpenInventory().setItem(22, TradeItems.ITEM_HANDLING_PROCESSING);
-        } else if (state == State.PROCESSING) {
-            tradePlayer.getPlayer().getOpenInventory().setItem(22, TradeItems.ITEM_HANDLING_SURE);
-        } else {
-            tradePlayer.getPlayer().getOpenInventory().setItem(22, TradeItems.ITEM_ITEM_FRAME);
+        tradePlayer.getPlayer().getOpenInventory().setItem(22, state.getActionItem());
+
+        if (state == State.DONE) {
             finishTrade();
         }
     }
+
 
     /**
      * Returns a list of valid inventory slots for placing items in the trade.
@@ -249,7 +247,7 @@ public record Trade(TradePlayer host, TradePlayer target) implements TradeAction
                 .setDisplayname("§7• §e" + target.getPlayer().getName())
                 .build());
 
-        inventory.setItem(3, getCoinsItem(tradePlayer));
+        inventory.setItem(3, tradePlayer.getCoinsItem());
         inventory.setItem(5, new ItemUtil(Material.SUNFLOWER).setDisplayname("" + target.getCoins()).build());
 
         IntStream.range(9, 18).forEach(i -> inventory.setItem(i, TradeItems.ITEM_ITEM_FRAME));
@@ -273,29 +271,29 @@ public record Trade(TradePlayer host, TradePlayer target) implements TradeAction
         TradePlayer target = getTarget(tradePlayer);
         updateState(tradePlayer, State.UNFINISHED);
         updateState(target, State.UNFINISHED);
-        tradePlayer.getPlayer().getOpenInventory().setItem(3, getCoinsItem(tradePlayer));
+        tradePlayer.getPlayer().getOpenInventory().setItem(3, tradePlayer.getCoinsItem());
         target.getPlayer().getOpenInventory().setItem(5, new ItemUtil(Material.SUNFLOWER)
                 .setDisplayname("Coins:" + tradePlayer.getCoins())
                 .build());
     }
 
     /**
-     * Creates a custom ItemStack to display the coin and value amounts for a player in the trade.
-     *
-     * @param tradePlayer The player whose coin item is to be created.
-     * @return An ItemStack representing the player's coins and value.
-     */
-    @Override
-    public ItemStack getCoinsItem(@NonNull TradePlayer tradePlayer) {
-        return new ItemUtil(Material.SUNFLOWER)
-                .setDisplayname(tradePlayer.getCoins() + " " + tradePlayer.getValue() + " 400")
-                .build();
-    }
-
-    /**
      * Enum representing the possible states of the trade: UNFINISHED, PROCESSING, and DONE.
      */
+    @Getter
     public enum State {
-        UNFINISHED, PROCESSING, DONE;
+        UNFINISHED(TradeItems.ITEM_STATUS_UNFINISHED, TradeItems.ITEM_HANDLING_PROCESSING),
+        PROCESSING(TradeItems.ITEM_STATUS_PROCESSING, TradeItems.ITEM_HANDLING_SURE),
+        DONE(TradeItems.ITEM_STATUS_DONE, TradeItems.ITEM_ITEM_FRAME);
+
+        private final ItemStack statusItem;
+        private final ItemStack actionItem;
+
+        State(ItemStack statusItem, ItemStack actionItem) {
+            this.statusItem = statusItem;
+            this.actionItem = actionItem;
+        }
+
     }
+
 }

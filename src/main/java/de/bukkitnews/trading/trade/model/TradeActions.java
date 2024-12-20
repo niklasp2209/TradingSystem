@@ -27,9 +27,8 @@ public interface TradeActions {
      *
      * @param tradePlayer The player who is removing the item.
      * @param slot        The slot in the inventory where the item should be removed from.
-     * @param itemStack   The item to be removed.
      */
-    void removeItem(@NonNull TradePlayer tradePlayer, int slot, @NonNull ItemStack itemStack);
+    void removeItem(@NonNull TradePlayer tradePlayer, int slot);
 
     /**
      * Sets the amount of coins for the specified player.
@@ -88,12 +87,4 @@ public interface TradeActions {
      * @param tradePlayer The player whose coin item should be updated.
      */
     void updateCoinsItem(@NonNull TradePlayer tradePlayer);
-
-    /**
-     * Retrieves the coin item for the specified player.
-     *
-     * @param tradePlayer The player whose coin item is being retrieved.
-     * @return The ItemStack representing the coin item.
-     */
-    ItemStack getCoinsItem(@NonNull TradePlayer tradePlayer);
 }
