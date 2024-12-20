@@ -2,6 +2,12 @@
 
 Dieses Projekt bietet ein **Handelssystem** für Minecraft, bei dem Spieler ihre **Inventarobjekte** und **Coins** mit anderen Spielern tauschen können. Es nutzt **Vault**, um Coins als Währung zu verwalten. Das System ermöglicht es, Handelsanfragen zu senden, Inventarobjekte hinzuzufügen oder zu entfernen und den Handel abzuschließen.
 
+## Vault-Integration
+
+- **Vault** ist die zentrale Komponente für die Verwaltung von **Coins**. Es stellt sicher, dass Coins sicher zwischen den Spielern übertragen werden, wenn der Handel abgeschlossen wird.
+- Die **Vault-API** wird verwendet, um den Kontostand eines Spielers zu überprüfen und die Coins bei einem erfolgreichen Handel zu transferieren.
+- Das System sorgt dafür, dass keine Transaktionen ohne ausreichende Coins auf einem Spielerkonto durchgeführt werden.
+
 ## Wichtige Komponenten
 
 ### 1. TradePlayer
@@ -84,18 +90,3 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
 ### 5. Fehlerbehandlung und Validierung
 - Vor dem Abschluss des Handels wird überprüft, ob der Spieler genügend **Coins** auf seinem Vault-Konto hat und ob das Inventar des anderen Spielers ausreichend Platz für die Gegenstände bietet.
 - Falls ein Fehler auftritt (z. B. zu wenig Platz im Inventar oder fehlende Coins), erhalten die Spieler eine entsprechende Fehlermeldung, und der Handel wird nicht abgeschlossen.
-
-## Vault-Integration
-
-- **Vault** ist die zentrale Komponente für die Verwaltung von **Coins**. Es stellt sicher, dass Coins sicher zwischen den Spielern übertragen werden, wenn der Handel abgeschlossen wird.
-- Die **Vault-API** wird verwendet, um den Kontostand eines Spielers zu überprüfen und die Coins bei einem erfolgreichen Handel zu transferieren.
-- Das System sorgt dafür, dass keine Transaktionen ohne ausreichende Coins auf einem Spielerkonto durchgeführt werden.
-
-## Erweiterbarkeit
-
-- Das Handelssystem kann problemlos erweitert werden, um weitere Währungen oder benutzerdefinierte Gegenstände hinzuzufügen, indem zusätzliche Logik für den Umgang mit weiteren Vault-Währungen implementiert wird.
-- In Zukunft könnten auch komplexere Handelsoptionen integriert werden, wie z. B. das Tauschen von Währungen oder das Handeln mit seltenen, benutzerdefinierten Items.
-
-## Fazit
-
-Das Handelssystem für Minecraft bietet eine einfache und benutzerfreundliche Möglichkeit, **Gegenstände** und **Coins** zwischen Spielern auszutauschen. Mit der **Vault-Integration** werden **Coins** sicher und zuverlässig verwaltet, und das System sorgt dafür, dass alle Handelsbedingungen korrekt geprüft und ausgeführt werden. Es ist erweiterbar und flexibel, sodass es in verschiedenen Minecraft-Servern und -Wirtschaftssystemen genutzt werden kann.
