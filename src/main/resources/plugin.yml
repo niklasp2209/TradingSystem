@@ -1,0 +1,11 @@
+name: "Trading"
+author: BukkitNews
+version: '${project.version}'
+main: de.bukkitnews.trading.Trading
+api-version: 1.21
+depend:
+  - Vault
+commands:
+  trade:
+    description: Trading Command
+    aliases: [trading, traden, handel, handeln]
