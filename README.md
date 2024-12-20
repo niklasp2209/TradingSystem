@@ -32,8 +32,8 @@ public class TradePlayer {
 ```
 
 ### 2. Trade
-- Die `Trade`-Klasse verwaltet den gesamten Handelsvorgang zwischen zwei Spielern.
-- Sie ermöglicht es den Spielern, Gegenstände hinzuzufügen, Coins zu integrieren und den Status des Handels zu verwalten.
+- Der `Trade`-Record verwaltet den gesamten Handelsvorgang zwischen zwei Spielern.
+- Er ermöglicht es den Spielern, Gegenstände hinzuzufügen, Coins zu integrieren und den Status des Handels zu verwalten.
 - Vor dem Abschluss eines Handels wird geprüft, ob beide Spieler genügend **Coins** und Platz im Inventar des anderen haben.
 
   
