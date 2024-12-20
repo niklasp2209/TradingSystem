@@ -11,10 +11,21 @@ Dieses Projekt bietet ein **Handelssystem** für Minecraft, bei dem Spieler ihre
 
 ```java
 public class TradePlayer {
-    private Player player;
-    private List<ItemStack> inventoryItems;
-    private double coins;
-    private TradeStatus tradeStatus;
+
+    private final Player player;
+    private Trade.State state;
+    private final ArrayList<ItemStack> items;
+
+    private Optional<Integer> coins;
+    private Optional<Integer> value;
+
+    public TradePlayer(@NonNull Player player) {
+        this.player = player;
+        this.state = Trade.State.UNFINISHED;
+        this.items = new ArrayList<>();
+        this.coins = Optional.of(0);
+        this.value = Optional.of(1);
+    }
     
     // Weitere Methoden zum Hinzufügen und Entfernen von Items und Coins
 }
