@@ -8,7 +8,6 @@ import de.bukkitnews.trading.trade.listener.PlayerQuitListener;
 import de.bukkitnews.trading.util.MessageUtil;
 import lombok.Getter;
 import lombok.NonNull;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -26,8 +25,6 @@ public class Trading extends JavaPlugin {
     private ConfigManager messagesConfig;
     private TradeManager tradeManager;
 
-    private Economy economy;
-
     @Override
     public void onLoad(){
         Plugin vault = getServer().getPluginManager().getPlugin("Vault");
@@ -36,7 +33,6 @@ public class Trading extends JavaPlugin {
             getLogger().warning("Vault didnt found");
             getServer().getPluginManager().disablePlugin(this);
         }
-        this.economy = getServer().getServicesManager().getRegistration(Economy.class).getProvider();
 
         this.messagesConfig = new ConfigManager(this, "messages.yml");
         MessageUtil.loadMessages(messagesConfig);

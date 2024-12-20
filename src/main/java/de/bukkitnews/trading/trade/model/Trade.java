@@ -6,6 +6,7 @@ import de.bukkitnews.trading.util.TradeItems;
 import de.bukkitnews.trading.util.ItemUtil;
 import lombok.Getter;
 import lombok.NonNull;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -19,17 +20,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import static org.bukkit.Bukkit.getServer;
+
 /**
  * This class represents a trade between two players, allowing them to exchange items and coins.
  * It handles the various actions that can be performed during the trade, such as adding/removing items,
  * setting coins, and managing the state of the trade.
  */
-public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target, @NonNull Trading trading) implements TradeActions {
+public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) implements TradeActions {
 
-    public Trade(@NonNull TradePlayer host, @NonNull TradePlayer target, @NonNull Trading trading) {
+    public Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) {
         this.host = host;
         this.target = target;
-        this.trading = trading;
         Arrays.asList(host, target).forEach(this::createInventory);
     }
 
@@ -189,6 +191,7 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target, @Non
     public void finishTrade() {
         Player hostPlayer = this.host.getPlayer();
         Player targetPlayer = this.target.getPlayer();
+        Economy economy = getServer().getServicesManager().getRegistration(Economy.class).getProvider();
 
         if (this.host.getState() != State.DONE || this.target.getState() != State.DONE) {
             return;
@@ -206,8 +209,8 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target, @Non
             return;
         }
 
-        if ((this.host.getCoins() > 0 && this.trading.getEconomy().getBalance(hostPlayer) - this.host.getCoins() <= 0.0D) ||
-                (this.target.getCoins() > 0 && this.trading.getEconomy().getBalance(targetPlayer) - this.target.getCoins() <= 0.0D)) {
+        if ((this.host.getCoins() > 0 && economy.getBalance(hostPlayer) - this.host.getCoins() <= 0.0D) ||
+                (this.target.getCoins() > 0 && economy.getBalance(targetPlayer) - this.target.getCoins() <= 0.0D)) {
 
             if (this.host.getCoins() > 0) {
                 hostPlayer.sendMessage(MessageUtil.getMessage("trade_notcoins"));
@@ -224,13 +227,13 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target, @Non
 
         //handle coins
         if (this.host.getCoins() > 0) {
-            this.trading.getEconomy().withdrawPlayer(hostPlayer, this.host.getCoins());
-            this.trading.getEconomy().depositPlayer(targetPlayer, this.host.getCoins());
+            economy.withdrawPlayer(hostPlayer, this.host.getCoins());
+            economy.depositPlayer(targetPlayer, this.host.getCoins());
         }
 
         if (this.target.getCoins() > 0) {
-            this.trading.getEconomy().withdrawPlayer(targetPlayer, this.target.getCoins());
-            this.trading.getEconomy().depositPlayer(hostPlayer, this.target.getCoins());
+            economy.withdrawPlayer(targetPlayer, this.target.getCoins());
+            economy.depositPlayer(hostPlayer, this.target.getCoins());
         }
 
         //handle items
