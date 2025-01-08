@@ -19,12 +19,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TradeCommand implements CommandExecutor {
 
-    private final Trading plugin;
+    @NonNull private final Trading plugin;
 
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
-        if (!(sender instanceof Player)) return true;
-        Player player = (Player) sender;
+        if (!(sender instanceof Player player)) return true;
 
         if (args.length == 0) {
             player.sendMessage(MessageUtil.getMessage("command_trade_usage"));
@@ -72,7 +71,6 @@ public class TradeCommand implements CommandExecutor {
         plugin.getTradeManager().createTrade(player, target);
         player.sendMessage(MessageUtil.getMessage("player_trade_accept", target.getName()));
         target.sendMessage(MessageUtil.getMessage("target_trade_accept", player.getName()));
-        return;
     }
 
     /**
@@ -91,6 +89,5 @@ public class TradeCommand implements CommandExecutor {
         plugin.getTradeManager().registerInvite(player, target);
         player.sendMessage(MessageUtil.getMessage("player_trade_invite", target.getName()));
         target.sendMessage(MessageUtil.getMessage("target_trade_invite", player.getName()));
-        return;
     }
 }

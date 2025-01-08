@@ -20,12 +20,12 @@ import java.util.Optional;
 @Setter
 public class TradePlayer {
 
-    private final Player player;
-    private Trade.State state;
-    private final ArrayList<ItemStack> items;
+    @NonNull private final Player player;
+    @NonNull private Trade.State state;
+    @NonNull private final ArrayList<ItemStack> items;
 
-    private Optional<Integer> coins;
-    private Optional<Integer> value;
+    @NonNull private Optional<Integer> coins;
+    @NonNull private Optional<Integer> value;
 
     public TradePlayer(@NonNull Player player) {
         this.player = player;

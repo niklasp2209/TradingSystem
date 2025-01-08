@@ -142,7 +142,7 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
      * @param state       The new state to set for the player.
      */
     @Override
-    public void updateState(@NonNull TradePlayer tradePlayer, State state) {
+    public void updateState(@NonNull TradePlayer tradePlayer, @NonNull State state) {
         if (tradePlayer.getState() == state) {
             return;
         }

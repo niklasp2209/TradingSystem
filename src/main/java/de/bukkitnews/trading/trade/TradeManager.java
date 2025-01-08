@@ -16,8 +16,8 @@ import java.util.UUID;
  */
 public class TradeManager {
 
-    private final HashMap<UUID, UUID> invites = new HashMap<>();
-    private final HashMap<UUID, Trade> trades = new HashMap<>();
+    @NonNull private final HashMap<UUID, UUID> invites = new HashMap<>();
+    @NonNull private final HashMap<UUID, Trade> trades = new HashMap<>();
 
     /**
      * Retrieves the player that has invited the specified player to trade.

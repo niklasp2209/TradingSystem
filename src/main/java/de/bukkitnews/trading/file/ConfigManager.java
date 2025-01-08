@@ -14,8 +14,8 @@ import java.io.IOException;
  * exists and is accessible.
  */
 public class ConfigManager {
-    private final Trading plugin;
-    private final String fileName;
+    @NonNull private final Trading plugin;
+    @NonNull private final String fileName;
     private File configFile;
     private FileConfiguration fileConfiguration;
 

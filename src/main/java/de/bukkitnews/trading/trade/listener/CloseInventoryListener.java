@@ -17,7 +17,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 @RequiredArgsConstructor
 public class CloseInventoryListener implements Listener {
 
-    private final Trading trading;
+    @NonNull private final Trading trading;
 
     /**
      * This event handler is triggered when a player closes their inventory.

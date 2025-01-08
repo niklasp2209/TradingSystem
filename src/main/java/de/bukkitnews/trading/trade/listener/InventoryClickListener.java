@@ -24,7 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class InventoryClickListener implements Listener {
 
-    private final Trading trading;
+    @NonNull private final Trading trading;
 
     @EventHandler
     public void handleClick(@NonNull InventoryClickEvent event) {
@@ -37,7 +37,7 @@ public class InventoryClickListener implements Listener {
         event.setCancelled(true);
 
         Optional<Trade> tradeOptional = this.trading.getTradeManager().getTrade(player);
-        if (!tradeOptional.isPresent()) {
+        if (tradeOptional.isEmpty()) {
             event.getView().close();
             return;
         }
@@ -45,7 +45,7 @@ public class InventoryClickListener implements Listener {
         Trade trade = tradeOptional.get();
 
         Optional<TradePlayer> tradePlayerOptional = trade.getPlayer(player);
-        if (!tradePlayerOptional.isPresent()) {
+        if (tradePlayerOptional.isEmpty()) {
             event.getView().close();
             return;
         }

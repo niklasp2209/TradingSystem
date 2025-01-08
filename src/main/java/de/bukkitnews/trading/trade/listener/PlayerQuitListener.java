@@ -15,7 +15,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 @RequiredArgsConstructor
 public class PlayerQuitListener implements Listener {
 
-    private final Trading trading;
+    @NonNull private final Trading trading;
 
     /**
      * This method unregisters a player's trade and invite status from the TradeManager.

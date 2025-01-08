@@ -1,5 +1,6 @@
 package de.bukkitnews.trading.util;
 
+import lombok.NonNull;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -11,14 +12,15 @@ import java.util.Arrays;
 
 public class ItemUtil {
 
-    private final ItemStack itemStack;
+    @NonNull private final ItemStack itemStack;
+    @NonNull
     private final ItemMeta itemMeta;
 
     /**
      * Constructs an ItemBuilder with the specified material.
      * @param material The material of the item to be created.
      */
-    public ItemUtil(Material material){
+    public ItemUtil(@NonNull Material material){
         this.itemStack = new ItemStack(material);
         this.itemMeta = this.itemStack.getItemMeta();
     }
@@ -28,7 +30,7 @@ public class ItemUtil {
      * @param name The display name to set.
      * @return The current ItemBuilder instance for chaining.
      */
-    public ItemUtil setDisplayname(final String name){
+    public ItemUtil setDisplayname(@NonNull final String name){
         this.itemMeta.setDisplayName(name);
         return this;
     }
@@ -39,7 +41,7 @@ public class ItemUtil {
      * @param level The level of the enchantment.
      * @return The current ItemBuilder instance for chaining.
      */
-    public ItemUtil addEnchantment (Enchantment enchantment, int level){
+    public ItemUtil addEnchantment (@NonNull Enchantment enchantment, int level){
         this.itemMeta.addEnchant(enchantment, level, true);
         this.itemStack.addUnsafeEnchantment(enchantment, level);
         return this;
@@ -60,7 +62,7 @@ public class ItemUtil {
      * @param lore The lore to set.
      * @return The current ItemBuilder instance for chaining.
      */
-    public ItemUtil setLore (final String... lore) {
+    public ItemUtil setLore (@NonNull final String... lore) {
         this.itemMeta.setLore(Arrays.asList(lore));
         return this;
     }
@@ -87,7 +89,7 @@ public class ItemUtil {
      * @param owner The username or skull owner (e.g., player's name).
      * @return The current ItemBuilder instance for chaining.
      */
-    public ItemUtil setSkullOwner(String owner) {
+    public ItemUtil setSkullOwner(@NonNull String owner) {
         if (this.itemStack.getType() == Material.PLAYER_HEAD) {
             SkullMeta skullMeta = (SkullMeta) this.itemMeta;
             skullMeta.setOwner(owner);
