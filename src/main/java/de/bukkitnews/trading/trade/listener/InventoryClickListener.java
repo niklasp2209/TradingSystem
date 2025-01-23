@@ -5,7 +5,6 @@ import de.bukkitnews.trading.trade.model.Trade;
 import de.bukkitnews.trading.trade.model.TradePlayer;
 import de.bukkitnews.trading.util.MessageUtil;
 import de.bukkitnews.trading.util.TradeItems;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -14,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -24,10 +24,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class InventoryClickListener implements Listener {
 
-    @NonNull private final Trading trading;
+    private final @NotNull Trading trading;
 
     @EventHandler
-    public void handleClick(@NonNull InventoryClickEvent event) {
+    public void handleClick(@NotNull InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
 
         if (!event.getView().getTitle().equals(MessageUtil.getMessage("inventory"))) {
@@ -36,7 +36,7 @@ public class InventoryClickListener implements Listener {
 
         event.setCancelled(true);
 
-        Optional<Trade> tradeOptional = this.trading.getTradeManager().getTrade(player);
+        Optional<Trade> tradeOptional = trading.getTradeManager().getTrade(player);
         if (tradeOptional.isEmpty()) {
             event.getView().close();
             return;
@@ -82,7 +82,7 @@ public class InventoryClickListener implements Listener {
      * @param tradePlayer The TradePlayer representing the player in the trade.
      * @param trade       The active trade involving the player.
      */
-    private void handleCoinModification(@NonNull InventoryClickEvent event, @NonNull TradePlayer tradePlayer, @NonNull Trade trade) {
+    private void handleCoinModification(@NotNull InventoryClickEvent event, @NotNull TradePlayer tradePlayer, @NotNull Trade trade) {
         switch (event.getClick()) {
             case LEFT:
                 int newCoinsLeft = tradePlayer.getCoins() + tradePlayer.getValue();
@@ -119,7 +119,7 @@ public class InventoryClickListener implements Listener {
      * @param trade       The active trade involving the player.
      * @param tradePlayer The TradePlayer representing the player in the trade.
      */
-    private void handleItemModification(@NonNull InventoryClickEvent event, @NonNull Trade trade, @NonNull TradePlayer tradePlayer) {
+    private void handleItemModification(@NotNull InventoryClickEvent event, @NotNull Trade trade, @NotNull TradePlayer tradePlayer) {
         if (trade.getValidSlots().contains(event.getRawSlot())) {
             trade.removeItem(tradePlayer, event.getRawSlot());
         } else {

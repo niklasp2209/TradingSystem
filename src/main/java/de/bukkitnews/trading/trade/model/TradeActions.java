@@ -1,7 +1,7 @@
 package de.bukkitnews.trading.trade.model;
 
-import lombok.NonNull;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public interface TradeActions {
      * @param itemStack   The item to be added.
      * @return true if the item was successfully added, false otherwise.
      */
-    boolean addItem(@NonNull TradePlayer tradePlayer, int slot, @NonNull ItemStack itemStack);
+    boolean addItem(@NotNull TradePlayer tradePlayer, int slot, @NotNull ItemStack itemStack);
 
     /**
      * Removes an item from the trade for the specified player at a given slot.
@@ -28,7 +28,7 @@ public interface TradeActions {
      * @param tradePlayer The player who is removing the item.
      * @param slot        The slot in the inventory where the item should be removed from.
      */
-    void removeItem(@NonNull TradePlayer tradePlayer, int slot);
+    void removeItem(@NotNull TradePlayer tradePlayer, int slot);
 
     /**
      * Sets the amount of coins for the specified player.
@@ -36,7 +36,7 @@ public interface TradeActions {
      * @param tradePlayer The player whose coins are being set.
      * @param coins       The number of coins to set.
      */
-    void setCoins(@NonNull TradePlayer tradePlayer, int coins);
+    void setCoins(@NotNull TradePlayer tradePlayer, int coins);
 
     /**
      * Sets the value of the trade for the specified player.
@@ -44,7 +44,7 @@ public interface TradeActions {
      * @param tradePlayer The player whose trade value is being set.
      * @param value       The value to set for the trade.
      */
-    void setValue(@NonNull TradePlayer tradePlayer, int value);
+    void setValue(@NotNull TradePlayer tradePlayer, int value);
 
     /**
      * Updates the state of the trade for the specified player.
@@ -52,7 +52,7 @@ public interface TradeActions {
      * @param tradePlayer The player whose trade state is being updated.
      * @param state       The new state of the trade.
      */
-    void updateState(@NonNull TradePlayer tradePlayer, Trade.State state);
+    void updateState(@NotNull TradePlayer tradePlayer, Trade.State state);
 
     /**
      * Returns a list of valid slots available for the trade.
@@ -79,12 +79,12 @@ public interface TradeActions {
      *
      * @param tradePlayer The player for whom the inventory is being created.
      */
-    void createInventory(@NonNull TradePlayer tradePlayer);
+    void createInventory(@NotNull TradePlayer tradePlayer);
 
     /**
      * Updates the coin item for the specified player.
      *
      * @param tradePlayer The player whose coin item should be updated.
      */
-    void updateCoinsItem(@NonNull TradePlayer tradePlayer);
+    void updateCoinsItem(@NotNull TradePlayer tradePlayer);
 }

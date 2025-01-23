@@ -1,11 +1,9 @@
 package de.bukkitnews.trading.trade.model;
 
-import de.bukkitnews.trading.Trading;
 import de.bukkitnews.trading.util.MessageUtil;
 import de.bukkitnews.trading.util.TradeItems;
 import de.bukkitnews.trading.util.ItemUtil;
 import lombok.Getter;
-import lombok.NonNull;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -13,11 +11,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 
 import static org.bukkit.Bukkit.getServer;
@@ -27,9 +27,10 @@ import static org.bukkit.Bukkit.getServer;
  * It handles the various actions that can be performed during the trade, such as adding/removing items,
  * setting coins, and managing the state of the trade.
  */
-public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) implements TradeActions {
+public record Trade(@NotNull TradePlayer host,
+                    @NotNull TradePlayer target) implements TradeActions {
 
-    public Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) {
+    public Trade(@NotNull TradePlayer host, @NotNull TradePlayer target) {
         this.host = host;
         this.target = target;
         Arrays.asList(host, target).forEach(this::createInventory);
@@ -41,9 +42,9 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
      * @param player The player whose corresponding TradePlayer is to be retrieved.
      * @return An Optional containing the TradePlayer or empty if the player is null.
      */
-    public Optional<TradePlayer> getPlayer(@Nullable Player player) {
+    public @NotNull Optional<TradePlayer> getPlayer(@NotNull Player player) {
         return Optional.ofNullable(player)
-                .map(p -> p.equals(this.host.getPlayer()) ? this.host : this.target);
+                .map(p -> p.equals(host.getPlayer()) ? host : target);
     }
 
     /**
@@ -53,9 +54,9 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
      * @return The opposing TradePlayer.
      * @throws IllegalArgumentException If the provided TradePlayer is not part of the trade.
      */
-    public TradePlayer getTarget(@Nullable TradePlayer tradePlayer) {
+    public @Nullable TradePlayer getTarget(@Nullable TradePlayer tradePlayer) {
         return Optional.ofNullable(tradePlayer)
-                .map(p -> p.equals(this.host) ? this.target : this.host)
+                .map(p -> p.equals(host) ? target : host)
                 .orElseThrow(() -> new IllegalArgumentException("TradePlayer not part of the trade"));
     }
 
@@ -69,7 +70,7 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
      * @return true if the item was successfully added, false otherwise.
      */
     @Override
-    public boolean addItem(@NonNull TradePlayer tradePlayer, int slot, @NonNull ItemStack itemStack) {
+    public boolean addItem(@NotNull TradePlayer tradePlayer, int slot, @NotNull ItemStack itemStack) {
         return getValidSlots().stream()
                 .filter(i -> tradePlayer.getPlayer().getOpenInventory().getItem(i) == null)
                 .findFirst()
@@ -93,7 +94,7 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
      * @param slot        The slot where the item is being removed from.
      */
     @Override
-    public void removeItem(@NonNull TradePlayer tradePlayer, int slot) {
+    public void removeItem(@NotNull TradePlayer tradePlayer, int slot) {
         TradePlayer target = getTarget(tradePlayer);
         updateState(tradePlayer, State.UNFINISHED);
         updateState(target, State.UNFINISHED);
@@ -117,7 +118,7 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
      * @param coins       The number of coins to set.
      */
     @Override
-    public void setCoins(@NonNull TradePlayer tradePlayer, int coins) {
+    public void setCoins(@NotNull TradePlayer tradePlayer, int coins) {
         tradePlayer.setCoins(coins);
         updateCoinsItem(tradePlayer);
     }
@@ -129,7 +130,7 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
      * @param value       The value to set.
      */
     @Override
-    public void setValue(@NonNull TradePlayer tradePlayer, int value) {
+    public void setValue(@NotNull TradePlayer tradePlayer, int value) {
         tradePlayer.setValue(value);
         updateCoinsItem(tradePlayer);
     }
@@ -142,7 +143,7 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
      * @param state       The new state to set for the player.
      */
     @Override
-    public void updateState(@NonNull TradePlayer tradePlayer, @NonNull State state) {
+    public void updateState(@NotNull TradePlayer tradePlayer, @NotNull State state) {
         if (tradePlayer.getState() == state) {
             return;
         }
@@ -157,7 +158,7 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
         tradePlayer.getPlayer().getOpenInventory().setItem(22, state.getActionItem());
 
         if (state == State.DONE) {
-            finishTrade();
+            finishTradeAsync();
         }
     }
 
@@ -168,7 +169,7 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
      * @return A list of valid slots for placing items.
      */
     @Override
-    public List<Integer> getValidSlots() {
+    public @NotNull List<Integer> getValidSlots() {
         return Arrays.asList(27, 28, 29, 30, 36, 37, 38, 39, 45, 46, 47, 48);
     }
 
@@ -189,56 +190,36 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
      */
     @Override
     public void finishTrade() {
-        Player hostPlayer = this.host.getPlayer();
-        Player targetPlayer = this.target.getPlayer();
+        Player hostPlayer = host.getPlayer();
+        Player targetPlayer = target.getPlayer();
         Economy economy = getServer().getServicesManager().getRegistration(Economy.class).getProvider();
 
-        if (this.host.getState() != State.DONE || this.target.getState() != State.DONE) {
+        if (host.getState() != State.DONE || target.getState() != State.DONE) {
             return;
         }
 
-        if (this.host.getItems().size() > this.target.amountOfEmptySlots()) {
-            targetPlayer.sendMessage(MessageUtil.getMessage("trade_notenough"));
-            targetPlayer.closeInventory();
+        if (!checkInventorySpace(hostPlayer, targetPlayer)) {
             return;
         }
 
-        if (this.target.getItems().size() > this.host.amountOfEmptySlots()) {
-            hostPlayer.sendMessage(MessageUtil.getMessage("trade_notenough"));
-            hostPlayer.closeInventory();
-            return;
-        }
-
-        if ((this.host.getCoins() > 0 && economy.getBalance(hostPlayer) - this.host.getCoins() <= 0.0D) ||
-                (this.target.getCoins() > 0 && economy.getBalance(targetPlayer) - this.target.getCoins() <= 0.0D)) {
-
-            if (this.host.getCoins() > 0) {
-                hostPlayer.sendMessage(MessageUtil.getMessage("trade_notcoins"));
-                hostPlayer.closeInventory();
-            }
-
-            if (this.target.getCoins() > 0) {
-                targetPlayer.sendMessage(MessageUtil.getMessage("trade_notcoins"));
-                targetPlayer.closeInventory();
-            }
-
+        if (!checkBalance(hostPlayer, targetPlayer, economy)) {
             return;
         }
 
         //handle coins
-        if (this.host.getCoins() > 0) {
-            economy.withdrawPlayer(hostPlayer, this.host.getCoins());
-            economy.depositPlayer(targetPlayer, this.host.getCoins());
+        if (host.getCoins() > 0) {
+            economy.withdrawPlayer(hostPlayer, host.getCoins());
+            economy.depositPlayer(targetPlayer, host.getCoins());
         }
 
-        if (this.target.getCoins() > 0) {
-            economy.withdrawPlayer(targetPlayer, this.target.getCoins());
-            economy.depositPlayer(hostPlayer, this.target.getCoins());
+        if (target.getCoins() > 0) {
+            economy.withdrawPlayer(targetPlayer, target.getCoins());
+            economy.depositPlayer(hostPlayer, target.getCoins());
         }
 
         //handle items
-        this.host.getItems().forEach(item -> targetPlayer.getInventory().addItem(item));
-        this.target.getItems().forEach(item -> hostPlayer.getInventory().addItem(item));
+        host.getItems().forEach(item -> targetPlayer.getInventory().addItem(item));
+        target.getItems().forEach(item -> hostPlayer.getInventory().addItem(item));
 
         hostPlayer.closeInventory();
         targetPlayer.closeInventory();
@@ -252,7 +233,7 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
      * @param tradePlayer The TradePlayer whose inventory is to be created.
      */
     @Override
-    public void createInventory(@NonNull TradePlayer tradePlayer) {
+    public void createInventory(@NotNull TradePlayer tradePlayer) {
         TradePlayer target = getTarget(tradePlayer);
         Inventory inventory = Bukkit.createInventory((InventoryHolder) tradePlayer.getPlayer(),
                 54, MessageUtil.getMessage("inventory"));
@@ -292,7 +273,7 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
      * @param tradePlayer The player whose coins display item is to be updated.
      */
     @Override
-    public void updateCoinsItem(@NonNull TradePlayer tradePlayer) {
+    public void updateCoinsItem(@NotNull TradePlayer tradePlayer) {
         TradePlayer target = getTarget(tradePlayer);
         updateState(tradePlayer, State.UNFINISHED);
         updateState(target, State.UNFINISHED);
@@ -321,4 +302,62 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
 
     }
 
+    /**
+     * Checks if both players have enough inventory space to complete the trade.
+     *
+     * @param hostPlayer   The player initiating the trade (host).
+     * @param targetPlayer The player receiving the trade (target).
+     * @return Returns true if both players have enough inventory space, false otherwise.
+     */
+    private boolean checkInventorySpace(Player hostPlayer, Player targetPlayer) {
+        if (host.getItems().size() > target.amountOfEmptySlots()) {
+            targetPlayer.sendMessage(MessageUtil.getMessage("trade_notenough"));
+            targetPlayer.closeInventory();
+            return false;
+        }
+
+        if (target.getItems().size() > host.amountOfEmptySlots()) {
+            hostPlayer.sendMessage(MessageUtil.getMessage("trade_notenough"));
+            hostPlayer.closeInventory();
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if both players have enough balance to complete the trade.
+     *
+     * @param hostPlayer   The player initiating the trade (host).
+     * @param targetPlayer The player receiving the trade (target).
+     * @param economy      The economy system to check the players' balances.
+     * @return Returns true if both players have enough balance, false otherwise.
+     */
+    private boolean checkBalance(Player hostPlayer, Player targetPlayer, Economy economy) {
+        if ((host.getCoins() > 0 && economy.getBalance(hostPlayer) < host.getCoins()) ||
+                (target.getCoins() > 0 && economy.getBalance(targetPlayer) < target.getCoins())) {
+
+            if (host.getCoins() > 0) {
+                hostPlayer.sendMessage(MessageUtil.getMessage("trade_notcoins"));
+                hostPlayer.closeInventory();
+            }
+
+            if (target.getCoins() > 0) {
+                targetPlayer.sendMessage(MessageUtil.getMessage("trade_notcoins"));
+                targetPlayer.closeInventory();
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Initiates the trade completion asynchronously.
+     * This method runs the `finishTrade` method in a separate thread to avoid blocking the main thread.
+     */
+    private void finishTradeAsync() {
+        CompletableFuture.runAsync(this::finishTrade);
+    }
 }

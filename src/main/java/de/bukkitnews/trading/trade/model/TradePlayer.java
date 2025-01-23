@@ -2,11 +2,11 @@ package de.bukkitnews.trading.trade.model;
 
 import de.bukkitnews.trading.util.ItemUtil;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -20,14 +20,14 @@ import java.util.Optional;
 @Setter
 public class TradePlayer {
 
-    @NonNull private final Player player;
-    @NonNull private Trade.State state;
-    @NonNull private final ArrayList<ItemStack> items;
+    private final @NotNull Player player;
+    private @NotNull Trade.State state;
+    private final @NotNull ArrayList<ItemStack> items;
 
-    @NonNull private Optional<Integer> coins;
-    @NonNull private Optional<Integer> value;
+    private @NotNull Optional<Integer> coins;
+    private @NotNull Optional<Integer> value;
 
-    public TradePlayer(@NonNull Player player) {
+    public TradePlayer(@NotNull Player player) {
         this.player = player;
         this.state = Trade.State.UNFINISHED;
         this.items = new ArrayList<>();
@@ -41,10 +41,13 @@ public class TradePlayer {
      * @return The number of empty slots in the player's inventory.
      */
     public int amountOfEmptySlots() {
-        return (int) java.util.stream.IntStream.range(0, 36)
-                .mapToObj(i -> this.player.getInventory().getItem(i))
-                .filter(java.util.Objects::isNull)
-                .count();
+        int emptySlots = 0;
+        for (int i = 0; i < 36; i++) {
+            if (player.getInventory().getItem(i) == null) {
+                emptySlots++;
+            }
+        }
+        return emptySlots;
     }
 
     /**
@@ -52,9 +55,9 @@ public class TradePlayer {
      *
      * @return An ItemStack representing the player's coins and value.
      */
-    public ItemStack getCoinsItem() {
+    public @NotNull ItemStack getCoinsItem() {
         return new ItemUtil(Material.SUNFLOWER)
-                .setDisplayname(this.coins + " " + this.value + " 400")
+                .setDisplayname(coins + " " + value + " 400")
                 .build();
     }
 

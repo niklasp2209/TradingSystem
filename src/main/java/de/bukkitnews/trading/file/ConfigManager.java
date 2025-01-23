@@ -4,6 +4,7 @@ import de.bukkitnews.trading.Trading;
 import lombok.NonNull;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,8 +15,8 @@ import java.io.IOException;
  * exists and is accessible.
  */
 public class ConfigManager {
-    @NonNull private final Trading plugin;
-    @NonNull private final String fileName;
+    private final @NotNull Trading plugin;
+    private final @NotNull String fileName;
     private File configFile;
     private FileConfiguration fileConfiguration;
 

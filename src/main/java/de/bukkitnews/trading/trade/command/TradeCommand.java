@@ -2,13 +2,13 @@ package de.bukkitnews.trading.trade.command;
 
 import de.bukkitnews.trading.Trading;
 import de.bukkitnews.trading.util.MessageUtil;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -19,10 +19,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TradeCommand implements CommandExecutor {
 
-    @NonNull private final Trading plugin;
+    private final @NotNull Trading plugin;
 
     @Override
-    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) return true;
 
         if (args.length == 0) {
@@ -60,7 +60,7 @@ public class TradeCommand implements CommandExecutor {
      * @param player The player accepting the trade.
      * @param target The player who sent the trade invitation.
      */
-    private void handleAcceptCommand(@NonNull Player player, @NonNull Player target) {
+    private void handleAcceptCommand(@NotNull Player player, @NotNull Player target) {
         if (!plugin.getTradeManager().inviteValid(player)) {
             player.sendMessage(MessageUtil.getMessage("trade_no_invites"));
             return;
@@ -80,7 +80,7 @@ public class TradeCommand implements CommandExecutor {
      * @param player The player who is sending the trade invitation.
      * @param target The player who is being invited to trade.
      */
-    private void handleInviteCommand(@NonNull Player player, @NonNull Player target) {
+    private void handleInviteCommand(@NotNull Player player, @NotNull Player target) {
         if (player.equals(target)) {
             player.sendMessage(MessageUtil.getMessage("command_trade_yourself"));
             return;
