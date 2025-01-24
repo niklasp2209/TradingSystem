@@ -54,16 +54,41 @@ public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) impl
 }
 ```
 
-### 3. TradeManager
+## 3. Caching der Handelslogs
+
+Um die Leistung zu verbessern und wiederholte Anfragen zu optimieren, verwendet das System ein **Caching** für die Handelslogs. Hierbei wird eine **Cache-Größe** von maximal **200 Trades** pro Spieler verwendet. Wenn mehr als 200 Handelslogs für einen Spieler im Cache gespeichert werden, wird das älteste Log entfernt, um Platz für neue Einträge zu schaffen.
+
+### Funktionsweise des Caching:
+- Jeder Spieler hat eine Liste von Handelslogs, die im Cache gespeichert werden.
+- Wenn ein Spieler nach seinen Handelslogs fragt, wird zuerst der Cache überprüft.
+- Wenn die Logs nicht im Cache vorhanden sind, werden sie aus der Konfigurationsdatei geladen und anschließend im Cache gespeichert.
+- Der Cache sorgt dafür, dass nicht jedes Mal die komplette Konfigurationsdatei geladen werden muss, was die Abfragegeschwindigkeit verbessert.
+
+### Maximale Cache-Größe:
+- Es werden maximal **200 Handelslogs** pro Spieler im Cache gehalten.
+- Wenn der Cache voll ist und ein weiteres Handelslog hinzugefügt werden soll, wird das älteste Log aus dem Cache entfernt, um Platz für den neuen Eintrag zu schaffen.
+
+```java
+private static final int MAX_CACHE_SIZE = 200;
+
+private final Map<UUID, List<String>> tradeLogCache = new LinkedHashMap<>(MAX_CACHE_SIZE, 0.75f, true) {
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<UUID, List<String>> eldest) {
+        return size() > MAX_CACHE_SIZE;
+    }
+};
+```
+
+### 4. TradeManager
 - Der `TradeManager` ist für die Verwaltung aller Handelsanfragen verantwortlich. Er verfolgt alle aktiven Handelsvorgänge und sorgt dafür, dass nur gültige Anfragen bearbeitet werden.
 - Handelsanfragen werden über eine Einladung in Form eines Befehls (z. B. `/trade <Spieler>`) gestartet und können vom eingeladenen Spieler akzeptiert oder abgelehnt werden.
 
-### 4. Vault-Integration
+### 5. Vault-Integration
 - Das System verwendet **Vault** zur Verwaltung von **Coins**. Diese Integration ermöglicht es, Coins von einem Spieler zu einem anderen zu übertragen, wenn ein Handel abgeschlossen wird.
 - Der Trade-Manager überprüft vor dem Abschluss eines Handels, ob der Spieler ausreichend Coins in seinem Vault-Konto hat.
 - Vault stellt sicher, dass alle Transaktionen mit Coins korrekt verarbeitet und auf den Konten der Spieler aktualisiert werden.
 
-### 5. TradeCommand
+### 6. TradeCommand
 - Diese Klasse stellt die Befehle zur Verfügung, die im Spiel verwendet werden, um Handelsanfragen zu senden und zu akzeptieren.
 - Mit dem Befehl `/trade <Player>` kann ein Spieler einem anderen Spieler eine Handelsanfrage senden.
 - Der eingeladene Spieler kann den Handel mit `/trade accept <Player>` annehmen und seine Angebote hinzufügen oder ändern.
