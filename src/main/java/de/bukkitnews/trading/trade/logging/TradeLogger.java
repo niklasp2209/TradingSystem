@@ -52,7 +52,7 @@ public class TradeLogger {
      *
      * @return The log file.
      */
-    private File createFile() {
+    private @NotNull File createFile() {
         File logsDir = new File(plugin.getDataFolder(), "logs");
         if (!logsDir.exists() && !logsDir.mkdir()) {
             plugin.getLogger().severe("Could not create logs directory.");
