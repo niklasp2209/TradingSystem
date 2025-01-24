@@ -7,17 +7,22 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * This class handles the "/trade" command logic, allowing players to invite others to trade
  * and to accept trade invitations.
  */
 @RequiredArgsConstructor
-public class TradeCommand implements CommandExecutor {
+public class TradeCommand implements CommandExecutor, TabCompleter {
 
     private final @NotNull Trading plugin;
 
@@ -27,6 +32,23 @@ public class TradeCommand implements CommandExecutor {
 
         if (args.length == 0) {
             player.sendMessage(MessageUtil.getMessage("command_trade_usage"));
+            return true;
+        }
+
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("logs")) {
+            if (!player.hasPermission("trading.command.logs")) {
+                player.sendMessage(MessageUtil.getMessage("no_permission"));
+                return true;
+            }
+            Optional<Player> targetOpt = Optional.ofNullable(Bukkit.getPlayer(args[1]));
+            if (targetOpt.isEmpty()) {
+                player.sendMessage(MessageUtil.getMessage("player_not_online"));
+                return true;
+            }
+
+            Player target = targetOpt.get();
+            displayTradeLogs(player, target);
             return true;
         }
 
@@ -89,5 +111,62 @@ public class TradeCommand implements CommandExecutor {
         plugin.getTradeManager().registerInvite(player, target);
         player.sendMessage(MessageUtil.getMessage("player_trade_invite", target.getName()));
         target.sendMessage(MessageUtil.getMessage("target_trade_invite", player.getName()));
+    }
+
+    /**
+     * Displays all trade logs for a player sorted by timestamp, most recent first.
+     *
+     * @param player The player requesting the logs.
+     * @param target The target player whose logs are being displayed.
+     */
+    private void displayTradeLogs(@NotNull Player player, @NotNull Player target) {
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            Optional<List<String>> tradeLogsOpt = plugin.getTradeLogger().getTradeLogsForPlayer(target);
+
+            if (tradeLogsOpt.isEmpty()) {
+                player.sendMessage(MessageUtil.getMessage("no_trade_logs_found", target.getName()));
+                return;
+            }
+
+            List<String> sortedLogs = tradeLogsOpt.get().stream()
+                    .sorted((log1, log2) -> {
+                        String timestamp1 = extractTimestamp(log1);
+                        String timestamp2 = extractTimestamp(log2);
+                        return timestamp2.compareTo(timestamp1);
+                    })
+                    .collect(Collectors.toList());
+
+            sortedLogs.forEach(player::sendMessage);
+        });
+
+        future.join();
+    }
+
+    /**
+     * Extracts the timestamp from the trade log string. This assumes that the timestamp is in a known format.
+     *
+     * @param tradeLog The trade log string.
+     * @return The timestamp as a string.
+     */
+    private @NotNull String extractTimestamp(@NotNull String tradeLog) {
+        String timestampPrefix = "Timestamp: ";
+        int timestampStartIndex = tradeLog.indexOf(timestampPrefix) + timestampPrefix.length();
+        int timestampEndIndex = tradeLog.indexOf("\n", timestampStartIndex);
+        return tradeLog.substring(timestampStartIndex, timestampEndIndex).trim();
+    }
+
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        List<String> suggestions = new ArrayList<>();
+
+        if (args.length == 1 && args[0].equalsIgnoreCase("trade")) {
+            suggestions.add("logs");
+        }
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("trade")) {
+            suggestions.add("accept");
+        }
+
+        return suggestions;
     }
 }

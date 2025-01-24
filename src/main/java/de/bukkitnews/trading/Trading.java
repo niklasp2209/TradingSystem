@@ -5,6 +5,7 @@ import de.bukkitnews.trading.trade.TradeManager;
 import de.bukkitnews.trading.trade.command.TradeCommand;
 import de.bukkitnews.trading.trade.listener.CloseInventoryListener;
 import de.bukkitnews.trading.trade.listener.PlayerQuitListener;
+import de.bukkitnews.trading.trade.logging.TradeLogger;
 import de.bukkitnews.trading.util.MessageUtil;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -28,6 +29,8 @@ public class Trading extends JavaPlugin {
 
     private ConfigManager messagesConfig;
     private TradeManager tradeManager;
+    private TradeLogger tradeLogger;
+
     private Set<String> blockedWorlds;
 
     @Override
@@ -47,6 +50,7 @@ public class Trading extends JavaPlugin {
     @Override
     public void onEnable() {
         this.tradeManager = new TradeManager(this);
+        this.tradeLogger = new TradeLogger(this);
 
         initListener(Bukkit.getPluginManager());
         initCommands();
@@ -69,7 +73,10 @@ public class Trading extends JavaPlugin {
     }
 
     private void initCommands() {
-        getCommand("trade").setExecutor(new TradeCommand(this));
+        TradeCommand tradeCommand = new TradeCommand(this);
+
+        getCommand("trade").setExecutor(tradeCommand);
+        getCommand("trade").setTabCompleter(tradeCommand);
     }
 
     private void loadBlockedWorlds() {
