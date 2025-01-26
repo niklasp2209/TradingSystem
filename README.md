@@ -54,7 +54,7 @@ public record Trade(@NotNull TradePlayer host, @NotNull TradePlayer target) impl
 }
 ```
 
-## 3. Caching der Handelslogs
+### 3. Caching der Handelslogs
 
 Um die Leistung zu verbessern und wiederholte Anfragen zu optimieren, verwendet das System ein **Caching** für die Handelslogs. Hierbei wird eine **Cache-Größe** von maximal **200 Trades** pro Spieler verwendet. Wenn mehr als 200 Handelslogs für einen Spieler im Cache gespeichert werden, wird das älteste Log entfernt, um Platz für neue Einträge zu schaffen.
 
