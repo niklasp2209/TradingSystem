@@ -25,7 +25,7 @@ public class TradePlayer {
     private Optional<Integer> coins;
     private Optional<Integer> value;
 
-    public TradePlayer(@NonNull Player player) {
+    public TradePlayer(@NotNull Player player) {
         this.player = player;
         this.state = Trade.State.UNFINISHED;
         this.items = new ArrayList<>();
@@ -44,9 +44,9 @@ public class TradePlayer {
 
   
 ```java
-public record Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) implements TradeActions {
+public record Trade(@NotNull TradePlayer host, @NotNull TradePlayer target) implements TradeActions {
 
-    public Trade(@NonNull TradePlayer host, @NonNull TradePlayer target) {
+    public Trade(@NotNull TradePlayer host, @NotNull TradePlayer target) {
         this.host = host;
         this.target = target;
         Arrays.asList(host, target).forEach(this::createInventory);

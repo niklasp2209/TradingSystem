@@ -3,7 +3,6 @@ package de.bukkitnews.trading.trade.listener;
 import de.bukkitnews.trading.Trading;
 import de.bukkitnews.trading.trade.model.TradePlayer;
 import de.bukkitnews.trading.util.MessageUtil;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

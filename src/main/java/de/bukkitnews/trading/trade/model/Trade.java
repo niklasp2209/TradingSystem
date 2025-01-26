@@ -206,7 +206,6 @@ public record Trade(@NotNull TradePlayer host,
             return;
         }
 
-        //handle coins
         if (host.getCoins() > 0) {
             economy.withdrawPlayer(hostPlayer, host.getCoins());
             economy.depositPlayer(targetPlayer, host.getCoins());
@@ -217,7 +216,6 @@ public record Trade(@NotNull TradePlayer host,
             economy.depositPlayer(hostPlayer, target.getCoins());
         }
 
-        //handle items
         host.getItems().forEach(item -> targetPlayer.getInventory().addItem(item));
         target.getItems().forEach(item -> hostPlayer.getInventory().addItem(item));
 

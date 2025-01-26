@@ -28,7 +28,9 @@ public class TradeCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!(sender instanceof Player player)) return true;
+        if (!(sender instanceof Player player)) {
+            return true;
+        }
 
         if (args.length == 0) {
             player.sendMessage(MessageUtil.getMessage("command_trade_usage"));
@@ -156,7 +158,7 @@ public class TradeCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public @NotNull List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         List<String> suggestions = new ArrayList<>();
 
         if (args.length == 1 && args[0].equalsIgnoreCase("trade")) {

@@ -1,7 +1,6 @@
-package de.bukkitnews.trading.file;
+package de.bukkitnews.trading.config;
 
 import de.bukkitnews.trading.Trading;
-import lombok.NonNull;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -15,13 +14,13 @@ import java.io.IOException;
  * exists and is accessible.
  */
 public class ConfigManager {
-    private final @NotNull Trading plugin;
+    private final @NotNull Trading trading;
     private final @NotNull String fileName;
     private File configFile;
     private FileConfiguration fileConfiguration;
 
-    public ConfigManager(@NonNull Trading plugin, @NonNull String fileName) {
-        this.plugin = plugin;
+    public ConfigManager(@NotNull Trading trading, @NotNull String fileName) {
+        this.trading = trading;
         this.fileName = fileName;
         setup();
     }
@@ -32,14 +31,14 @@ public class ConfigManager {
      * default configuration resource from the plugin's JAR file.
      */
     private void setup() {
-        configFile = new File(plugin.getDataFolder(), fileName);
+        this.configFile = new File(trading.getDataFolder(), fileName);
 
         if (!configFile.exists()) {
-            plugin.getDataFolder().mkdirs();
-            plugin.saveResource(fileName, false);
+            trading.getDataFolder().mkdirs();
+            trading.saveResource(fileName, false);
         }
 
-        fileConfiguration = YamlConfiguration.loadConfiguration(configFile);
+        this.fileConfiguration = YamlConfiguration.loadConfiguration(configFile);
     }
 
     /**
@@ -47,7 +46,7 @@ public class ConfigManager {
      *
      * @return The FileConfiguration object containing the loaded configuration data
      */
-    public FileConfiguration getConfig() {
+    public @NotNull FileConfiguration getConfig() {
         return fileConfiguration;
     }
 
@@ -58,7 +57,7 @@ public class ConfigManager {
         try {
             fileConfiguration.save(configFile);
         } catch (IOException e) {
-            plugin.getLogger().severe("Could not save config file: " + fileName);
+            trading.getLogger().severe("Could not save config file: " + fileName);
             e.printStackTrace();
         }
     }
@@ -67,7 +66,7 @@ public class ConfigManager {
      * Reloads the configuration from the file, refreshing the configuration data.
      */
     public void reload() {
-        fileConfiguration = YamlConfiguration.loadConfiguration(configFile);
+        this.fileConfiguration = YamlConfiguration.loadConfiguration(configFile);
     }
 
     /**

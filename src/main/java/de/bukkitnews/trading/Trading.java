@@ -1,6 +1,6 @@
 package de.bukkitnews.trading;
 
-import de.bukkitnews.trading.file.ConfigManager;
+import de.bukkitnews.trading.config.ConfigManager;
 import de.bukkitnews.trading.trade.TradeManager;
 import de.bukkitnews.trading.trade.command.TradeCommand;
 import de.bukkitnews.trading.trade.listener.CloseInventoryListener;
